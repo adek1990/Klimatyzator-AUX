@@ -68,6 +68,12 @@ wifi:
   output_power: 20 dB
   ap:
     ssid: ${ap_ssid}
+  # ESP32-C3 ma jedno radio na Wi-Fi i BLE - Bluetooth dopiero po połączeniu z siecią,
+  # żeby nie zakłócał punktu dostępu konfiguracji
+  on_connect:
+    - ble.enable:
+  on_disconnect:
+    - ble.disable:
 
 captive_portal:
 
@@ -75,6 +81,9 @@ captive_portal:
 improv_serial:
 
 # Bluetooth proxy - HA wykrywa termometry BLE w zasięgu modułu (pasywnie, bez połączeń)
+esp32_ble:
+  enable_on_boot: false
+
 esp32_ble_tracker:
   scan_parameters:
     active: false
