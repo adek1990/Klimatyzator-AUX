@@ -89,6 +89,68 @@ danych sieci ani haseł - jeden plik pasuje do każdego modułu.
 UART: TX = GPIO21, RX = GPIO20 (4800 8E1), log przez USB-Serial/JTAG, więc UART0 zostaje wolny
 dla klimatyzatora. Kierunek linii ustawiają zworki TX/RX (instrukcja, sekcja 5).
 
+## Dodatek: termometr pokojowy
+
+Klimatyzator mierzy temperaturę w swojej obudowie, pod sufitem. Przy grzaniu trafia tam najcieplejsze
+powietrze, więc jednostka wyłącza się, zanim w pokoju zrobi się ciepło; przy chłodzeniu bywa odwrotnie.
+Protokół AUX nie pozwala podać jednostce innej temperatury (funkcja iFeel działa tylko z pilota), dlatego
+moduł robi to sam: **regulator PI przesuwa nastawę klimatyzatora tak, żeby w pokoju - tam, gdzie stoi
+termometr - była zadana temperatura**. Klimatyzator dalej sam płynnie steruje sprężarką.
+
+Termometr może być:
+
+| Źródło | Co potrzeba | Zalety |
+| --- | --- | --- |
+| **DS18B20 na kablu** | czujnik DS18B20 wpięty w GPIO4 albo GPIO5 | działa bez Home Assistant i bez Bluetooth |
+| **Termometr BLE** | np. Xiaomi LYWSD03MMC z firmware pvvx | bez kabli, na baterii ~rok, wilgotność gratis |
+| **Dowolny czujnik z HA** | czujnik temperatury już obecny w Home Assistant | bez dodatkowego sprzętu |
+
+### Ustawienia w Home Assistant (urządzenie modułu)
+
+| Encja | Znaczenie |
+| --- | --- |
+| Źródło temperatury pokoju | `Czujnik klimatyzatora` (regulacja wyłączona), `Termometr z Home Assistant`, `DS18B20 na GPIO4`, `DS18B20 na GPIO5` |
+| Regulacja w trybach | `Grzanie i chłodzenie`, `Tylko grzanie`, `Tylko chłodzenie` |
+| Temperatura zadana pokoju - grzanie / - chłodzenie | cel dla pokoju, osobno dla każdego trybu |
+| Stan regulacji | co regulator teraz robi, np. `pokój 20.6 / cel 21.0 -> nastawa 23.0` |
+
+Gdy regulacja działa, nastawa widoczna na karcie klimatyzatora to wartość wyliczona przez regulator
+(maks. ±4 °C od celu). Zmiana nastawy z pilota albo karty jest traktowana jak nowy cel pokoju dla
+bieżącego trybu. Bez odczytu z termometru (czujnik odłączony, termometr z HA milczy ponad 15 min)
+moduł ustawia nastawę równą celowi - klimatyzator pracuje wtedy jak zwykle, według swojego czujnika.
+
+### DS18B20 na kablu
+
+- Połączenie: VDD - 3,3 V, GND - GND, DATA - GPIO4 albo GPIO5. Jeden czujnik na pin.
+- Rezystor **4,7 kΩ między DATA a 3,3 V** - przy krótkim kablu wystarczy wbudowany podciąg ESP,
+  przy dłuższym (powyżej ~1 m) rezystor jest konieczny.
+- Czujnik jest wykrywany przy starcie modułu - po podłączeniu zrestartuj moduł (przycisk `Force Reboot`).
+- Odczyt widać w encji `Temperatura DS18B20 GPIO4` / `GPIO5`; potem wybierz to źródło w module.
+
+### Termometr BLE (pvvx)
+
+Moduł działa jako **Bluetooth proxy** - Home Assistant sam wykrywa termometry BLE w jego zasięgu.
+
+1. Kup termometr obsługiwany przez firmware pvvx, np. Xiaomi **LYWSD03MMC** (także MHO-C401, CGG1 i inne -
+   lista w [pvvx/ATC_MiThermometer](https://github.com/pvvx/ATC_MiThermometer)).
+2. W Chrome lub Edge otwórz [TelinkMiFlasher](https://pvvx.github.io/ATC_MiThermometer/TelinkMiFlasher.html),
+   połącz się z termometrem, wgraj firmware pvvx (`Custom Firmware` -> `Start Flashing`).
+3. Po ponownym połączeniu ustaw **Advertising type: BTHome v2** i zapisz (`Send Config`).
+4. W HA: **Ustawienia -> Urządzenia i usługi** - pojawi się wykryte urządzenie **BTHome**, dodaj je.
+5. Zaimportuj blueprint:
+   [![Importuj blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fadek1990%2FKlimatyzator-AUX%2Fblob%2Fmain%2Fblueprints%2Fklimatyzator-termometr.yaml)
+   ([blueprints/klimatyzator-termometr.yaml](blueprints/klimatyzator-termometr.yaml)).
+6. Utwórz z niego automatyzację: wybierz termometr z listy czujników temperatury i encję
+   `Temperatura z termometru` modułu.
+7. W module ustaw `Źródło temperatury pokoju` na `Termometr z Home Assistant`.
+
+Ten sam blueprint działa z każdym czujnikiem temperatury w HA (Zigbee, Wi-Fi, inny moduł).
+
+### Gdzie postawić termometr
+
+Na wysokości 1-1,5 m, tam gdzie się przebywa, z dala od strumienia powietrza z klimatyzatora,
+słońca, grzejnika i drzwi. Termometr w strumieniu nawiewu da regulację skokową.
+
 ## Zastrzeżenie
 
 Moduły nie są wyrobami certyfikowanymi do współpracy z konkretnym modelem klimatyzatora ani

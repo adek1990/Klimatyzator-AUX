@@ -1,0 +1,53 @@
+blueprint:
+  name: Klimatyzator AUX - termometr pokojowy
+  description: >-
+    Przekazuje odczyt wybranego termometru do modułu Wi-Fi klimatyzatora AUX (ESP32-C3),
+    żeby klimatyzator utrzymywał temperaturę w pokoju, a nie przy swoim czujniku.
+    Termometr może być dowolnym czujnikiem temperatury w Home Assistant, np. termometrem BLE
+    (pvvx / BTHome) wykrytym przez moduł działający jako Bluetooth proxy.
+    W module ustaw "Źródło temperatury pokoju" na "Termometr z Home Assistant".
+  domain: automation
+  source_url: https://github.com/adek1990/Klimatyzator-AUX/blob/main/blueprints/klimatyzator-termometr.yaml
+  input:
+    termometr:
+      name: Termometr w pokoju
+      description: Czujnik temperatury, według którego ma pracować klimatyzator.
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+              device_class: temperature
+    modul:
+      name: Moduł klimatyzatora
+      description: Encja "Temperatura z termometru" modułu klimatyzatora.
+      selector:
+        entity:
+          filter:
+            - domain: number
+              integration: esphome
+
+# co 5 min także bez zmiany odczytu - moduł po 15 min ciszy wraca do własnego czujnika
+trigger:
+  - platform: state
+    entity_id: !input termometr
+  - platform: time_pattern
+    minutes: "/5"
+  - platform: homeassistant
+    event: start
+
+condition:
+  - condition: template
+    value_template: "{{ states(termometr) | is_number }}"
+
+action:
+  - action: number.set_value
+    target:
+      entity_id: !input modul
+    data:
+      value: "{{ states(termometr) | float | round(1) }}"
+
+variables:
+  termometr: !input termometr
+
+mode: queued
+max: 3
