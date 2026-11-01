@@ -40,7 +40,7 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: adek1990.klimatyzator-aux-c3
-    version: "1.2.0"
+    version: "1.0.0"
 
 esp32:
   board: esp32-c3-devkitm-1
