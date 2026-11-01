@@ -113,11 +113,30 @@ Termometr może być:
 | Regulacja w trybach | `Grzanie i chłodzenie`, `Tylko grzanie`, `Tylko chłodzenie` |
 | Temperatura zadana pokoju - grzanie / - chłodzenie | cel dla pokoju, osobno dla każdego trybu |
 | Stan regulacji | co regulator teraz robi, np. `pokój 20.6 / cel 21.0 -> nastawa 23.0` |
+| Regulator Kp / Ki | nastawy regulatora PI (domyślnie 1,0 / 1,0) - wpisuje je autostrojenie, można zmienić ręcznie |
+| Autostrojenie - start / - przerwij | dobranie Kp i Ki do konkretnego pokoju i klimatyzatora |
 
 Gdy regulacja działa, nastawa widoczna na karcie klimatyzatora to wartość wyliczona przez regulator
 (maks. ±4 °C od celu). Zmiana nastawy z pilota albo karty jest traktowana jak nowy cel pokoju dla
 bieżącego trybu. Bez odczytu z termometru (czujnik odłączony, termometr z HA milczy ponad 15 min)
 moduł ustawia nastawę równą celowi - klimatyzator pracuje wtedy jak zwykle, według swojego czujnika.
+
+### Autostrojenie
+
+Każdy pokój nagrzewa się i chłodzi inaczej, więc domyślne nastawy regulatora to tylko punkt wyjścia.
+Autostrojenie dobiera je metodą przekaźnikową: moduł przełącza nastawę klimatyzatora o ±2 °C wokół
+punktu pracy za każdym razem, gdy temperatura w pokoju przekroczy cel, i mierzy okres oraz wielkość
+powstałych wahań. Po dwóch pełnych okresach wylicza Kp i Ki (łagodne reguły Tyreusa-Luybena, bez
+przeregulowań) i zapisuje je w module.
+
+- Uruchom, gdy regulacja według termometru działa już od kilku godzin i warunki są typowe:
+  zamknięte okna i drzwi, bez gotowania i bez słońca wpadającego prosto na termometr.
+- Trwa zwykle **2-5 godzin**; w tym czasie temperatura w pokoju waha się o około ±0,5-1 °C wokół celu.
+  Postęp widać w `Stan regulacji` (`przełączeń 3/5`). Nocny restart modułu jest wtedy wstrzymany.
+- Strojenie przerywa: zmiana nastawy z pilota lub karty, zmiana trybu, wyłączenie klimatyzatora,
+  brak odczytu z termometru, brak reakcji pokoju przez 3 h albo łącznie ponad 8 h. Nastawy zostają wtedy bez zmian.
+- Grzanie i chłodzenie zachowują się inaczej - najlepiej stroić w trybie, w którym klimatyzator pracuje
+  najczęściej. Wynik obowiązuje dla obu trybów.
 
 ### DS18B20 na kablu
 
