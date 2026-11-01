@@ -1,4 +1,4 @@
-# Moduły Wi-Fi do klimatyzatorów AUX — instrukcje
+# Moduły Wi-Fi do klimatyzatorów AUX - instrukcje
 
 ![Platforma](https://img.shields.io/badge/platforma-ESP32--C3%20%7C%20ESP8266-0e6b6b)
 ![Firmware](https://img.shields.io/badge/firmware-ESPHome%20%2B%20aux__ac-b45f1b)
@@ -7,7 +7,7 @@
 
 Dokumentacja użytkownika modułów Wi-Fi, które wpina się w gniazdo fabrycznego modułu
 sieciowego jednostki wewnętrznej klimatyzatora AUX. Moduł udostępnia klimatyzator w systemie
-automatyki domowej przez ESPHome — bez chmury producenta i bez aplikacji mobilnej.
+automatyki domowej przez ESPHome - bez chmury producenta i bez aplikacji mobilnej.
 
 ---
 
@@ -18,30 +18,30 @@ automatyki domowej przez ESPHome — bez chmury producenta i bez aplikacji mobil
 | [Moduł Wi-Fi AUX / ESP32-C3](Instrukcja%20modu%C5%82u%20klimatyzatora%20WiFi%20ESP32-C3.pdf) | ESP32-C3 | wtyk USB-A | zworki 2,54 mm |
 | [Moduł Wi-Fi AUX / ESP8266](Instrukcja%20modulu%20klimatyzatora%20WiFi%20ESP8266%20%28JST-SM%29.pdf) | ESP8266 (ESP-12E/F) | JST-SM 5-pin | przeróbka wiązki |
 
-Instrukcje są samodzielnymi plikami PDF — nie wymagają niczego poza czytnikiem.
+Instrukcje są samodzielnymi plikami PDF - nie wymagają niczego poza czytnikiem.
 
 ## Który moduł mam?
 
 Rozpoznasz go po zakończeniu wiązki:
 
-- **Wtyk USB-A** — wersja na ESP32-C3. Ma zewnętrzną antenę na złączu gwintowanym, okno
+- **Wtyk USB-A** - wersja na ESP32-C3. Ma zewnętrzną antenę na złączu gwintowanym, okno
   zworek wyboru kierunku linii TX/RX oraz listwę goldpinów do programowania i rozbudowy.
-  Kształt wtyku nie oznacza zgodności z USB — na jego stykach jest magistrala klimatyzatora.
-- **Wtyk JST-SM 5-pin** — wersja na ESP8266. Antena jest wykonana na płytce, obudowa ma tylko
+  Kształt wtyku nie oznacza zgodności z USB - na jego stykach jest magistrala klimatyzatora.
+- **Wtyk JST-SM 5-pin** - wersja na ESP8266. Antena jest wykonana na płytce, obudowa ma tylko
   wyjście wiązki, a firmware aktualizuje się wyłącznie przez OTA.
 
 ## Co znajdziesz w instrukcji
 
 Oba dokumenty mają ten sam układ:
 
-1. **Bezpieczeństwo** — praca przy jednostce zasilanej z sieci 230 V
-2. **Opis modułu** — budowa, funkcje, ułożenie w jednostce wewnętrznej
-3. **Złącze klimatyzatora** — rozkład styków i przypisanie sygnałów
-4. **Zasilanie** — parametry i próby na stanowisku
-5. **Podłączenie magistrali UART** — kolejność czynności krok po kroku
-6. **Zamiana linii TX/RX** — gdy płyta ma odwrotny opis gniazda
-7. **Konfiguracja ESPHome** — gotowy plik YAML
-8. **Uruchomienie i diagnostyka** — listy kontrolne i tabela *objaw → przyczyna → działanie*
+1. **Bezpieczeństwo** - praca przy jednostce zasilanej z sieci 230 V
+2. **Opis modułu** - budowa, funkcje, ułożenie w jednostce wewnętrznej
+3. **Złącze klimatyzatora** - rozkład styków i przypisanie sygnałów
+4. **Zasilanie** - parametry i próby na stanowisku
+5. **Podłączenie magistrali UART** - kolejność czynności krok po kroku
+6. **Zamiana linii TX/RX** - gdy płyta ma odwrotny opis gniazda
+7. **Konfiguracja ESPHome** - gotowy plik YAML
+8. **Uruchomienie i diagnostyka** - listy kontrolne i tabela *objaw → przyczyna → działanie*
 9. **Dane techniczne**
 10. **Ograniczenie odpowiedzialności**
 
@@ -49,8 +49,8 @@ Oba dokumenty mają ten sam układ:
 
 > [!WARNING]
 > Płyta główna jednostki wewnętrznej pracuje pod napięciem **230 V AC**. Wszystkie czynności
-> montażowe wykonuj przy zasilaniu odłączonym w rozdzielnicy — nie pilotem i nie wyłącznikiem
-> urządzenia — zabezpieczonym przed przypadkowym załączeniem, po odczekaniu co najmniej 5 minut.
+> montażowe wykonuj przy zasilaniu odłączonym w rozdzielnicy - nie pilotem i nie wyłącznikiem
+> urządzenia - zabezpieczonym przed przypadkowym załączeniem, po odczekaniu co najmniej 5 minut.
 
 > [!CAUTION]
 > Moduł nie ma separacji galwanicznej: jego masa jest wspólna z masą płyty sterującej.
@@ -64,10 +64,30 @@ Ingerencja w instalację klimatyzatora może oznaczać utratę gwarancji produce
 Moduły pracują pod ESPHome z komponentem `aux_ac`, obsługującym zastrzeżony protokół
 szeregowy klimatyzatorów AUX (4800 bit/s, 8E1):
 
-- [GrKoR/esphome_aux_ac_component](https://github.com/GrKoR/esphome_aux_ac_component) — komponent
-- [GrKoR/AUX_HVAC_Protocol](https://github.com/GrKoR/AUX_HVAC_Protocol) — opis protokołu
+- [GrKoR/esphome_aux_ac_component](https://github.com/GrKoR/esphome_aux_ac_component) - komponent
+- [GrKoR/AUX_HVAC_Protocol](https://github.com/GrKoR/AUX_HVAC_Protocol) - opis protokołu
 
 Gotowe konfiguracje YAML dla obu wariantów sprzętowych są w instrukcjach, w sekcji 7.
+
+### Gotowy firmware ESP32-C3
+
+Szablon [esphome/klimatyzator-esp32c3.yaml](esphome/klimatyzator-esp32c3.yaml) i skompilowane
+binarki w [Releases](https://github.com/adek1990/Klimatyzator-AUX/releases/latest). Firmware nie zawiera
+danych sieci ani haseł - jeden plik pasuje do każdego modułu.
+
+| Plik | Zastosowanie |
+| --- | --- |
+| `klimatyzator-c3-firmware.factory.bin` | pierwsze wgranie przewodowo (web.esphome.io albo esptool od adresu `0x0`) |
+| `klimatyzator-c3-firmware.ota.bin` | aktualizacja OTA z ESPHome / Home Assistant |
+
+1. Wgraj `factory.bin` przez listwę goldpinów (D+, D−, VDD 5V, GND), przy module wyjętym z klimatyzatora.
+2. Połącz się z otwartą siecią **`Klimatyzator-ESPC3`** - captive portal (192.168.4.1) pozwala wybrać
+   Wi-Fi. Alternatywnie Wi-Fi przez USB (Improv Serial) z web.esphome.io.
+3. Home Assistant wykryje urządzenie `klimatyzator-c3-xxxxxx` (końcówka z adresu MAC).
+   API bez szyfrowania, OTA bez hasła - po przejęciu w ESPHome dodaj własne.
+
+UART: TX = GPIO21, RX = GPIO20 (4800 8E1), log przez USB-Serial/JTAG, więc UART0 zostaje wolny
+dla klimatyzatora. Kierunek linii ustawiają zworki TX/RX (instrukcja, sekcja 5).
 
 ## Zastrzeżenie
 

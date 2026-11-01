@@ -1,1 +1,4 @@
 *.html
+esphome/bin/
+.esphome/
+secrets.yaml

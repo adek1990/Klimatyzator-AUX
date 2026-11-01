@@ -1,0 +1,151 @@
+# Klimatyzator AUX (protokół GrKoR/esphome_aux_ac_component) na ESP32-C3 - szablon ogólny.
+# Brak danych Wi-Fi, haseł i stałego IP: po wgraniu moduł wystawia otwarty AP "Klimatyzator-ESPC3",
+# po połączeniu captive portal (192.168.4.1) pozwala wybrać sieć. Dane Wi-Fi zostają we flash.
+# Nazwa w sieci dostaje końcówkę z MAC (klimatyzator-c3-xxxxxx), więc ten sam .bin pasuje do wielu sztuk.
+
+substitutions:
+  name: klimatyzator-c3
+  friendly_name: Klimatyzator
+  ap_ssid: Klimatyzator-ESPC3
+  # UART0 ESP32-C3 (SuperMini / DevKitM: TX=GPIO21, RX=GPIO20) - do złącza klimatyzatora przez konwerter 5V<->3,3V
+  uart_tx: GPIO21
+  uart_rx: GPIO20
+
+external_components:
+  - source: github://GrKoR/esphome_aux_ac_component
+    components: [ aux_ac ]
+    refresh: 0s
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  framework:
+    type: esp-idf
+
+safe_mode:
+
+preferences:
+  flash_write_interval: 10min
+
+# log po USB (USB_SERIAL_JTAG) - UART0 zostaje wolny dla klimatyzatora
+logger:
+  level: INFO
+  hardware_uart: USB_SERIAL_JTAG
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  reboot_timeout: 0s
+  output_power: 20 dB
+  ap:
+    ssid: ${ap_ssid}
+
+captive_portal:
+
+# konfiguracja Wi-Fi także przez kabel USB (np. web.esphome.io)
+improv_serial:
+
+uart:
+  id: ac_uart_bus
+  tx_pin: ${uart_tx}
+  rx_pin: ${uart_rx}
+  baud_rate: 4800
+  data_bits: 8
+  parity: EVEN
+  stop_bits: 1
+
+time:
+  - platform: homeassistant
+    id: time_ha
+    on_time:
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        then:
+          - button.press: reboot_button
+
+sensor:
+  - platform: internal_temperature
+    name: "Temperatura ESP32"
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: "Force Reboot"
+    id: reboot_button
+
+climate:
+  - platform: aux_ac
+    name: None
+    id: aux_id
+    uart_id: ac_uart_bus
+    period: 10s
+    show_action: true
+    display_inverted: true
+    optimistic: true
+    timeout: 150
+    indoor_temperature:
+      name: Indoor Temperature
+      id: indoor_temp
+      internal: false
+    display_state:
+      name: Display State
+      id: display_state
+      internal: false
+    outdoor_temperature:
+      name: Outdoor Temperature
+      id: outdoor_temp
+      internal: false
+    outbound_temperature:
+      name: Coolant Outbound Temperature
+      id: outbound_temp
+      internal: false
+    inbound_temperature:
+      name: Coolant Inbound Temperature
+      id: inbound_temp
+      internal: false
+    compressor_temperature:
+      name: Compressor Temperature
+      id: compressor_temp
+      internal: false
+    defrost_state:
+      name: Defrost State
+      id: defrost_state
+      internal: false
+    inverter_power:
+      name: Invertor Power
+      id: inverter_power
+      internal: false
+    preset_reporter:
+      name: Preset Reporter
+      id: preset_reporter
+      internal: false
+    vlouver_state:
+      name: VLouvers State
+      id: vlouver_state
+      internal: false
+    visual:
+      min_temperature: 16
+      max_temperature: 32
+      temperature_step: 0.5
+    supported_modes:
+      - COOL
+      - HEAT
+    custom_fan_modes:
+      - MUTE
+      - TURBO
+    supported_swing_modes:
+      - VERTICAL
+      - HORIZONTAL
+      - BOTH
