@@ -75,6 +75,15 @@ Szablon [esphome/klimatyzator-esp32c3.yaml](esphome/klimatyzator-esp32c3.yaml) i
 binarki w [Releases](https://github.com/adek1990/Klimatyzator-AUX/releases/latest). Firmware nie zawiera
 danych sieci ani haseł - jeden plik pasuje do każdego modułu.
 
+Klimatyzator, regulacja według termometru, autostrojenie, DS18B20 i Bluetooth proxy są w pakiecie
+[esphome/pakiety/klimatyzator-wspolny.yaml](esphome/pakiety/klimatyzator-wspolny.yaml) - plik płytki dokłada tylko
+platformę, sieć i piny UART. Inny moduł (np. na ESP32) dołącza ten sam pakiet prosto z repo:
+
+```yaml
+packages:
+  wspolny: github://adek1990/Klimatyzator-AUX/esphome/pakiety/klimatyzator-wspolny.yaml@main
+```
+
 | Plik | Zastosowanie |
 | --- | --- |
 | `klimatyzator-c3-firmware.factory.bin` | pierwsze wgranie przewodowo (web.esphome.io albo esptool od adresu `0x0`) |
