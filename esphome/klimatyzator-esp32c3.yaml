@@ -40,7 +40,7 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: adek1990.klimatyzator-aux-c3
-    version: "1.0.0"
+    version: "1.1.0"
 
 esp32:
   board: esp32-c3-devkitm-1
@@ -76,6 +76,11 @@ wifi:
     - ble.disable:
 
 captive_portal:
+
+# panel WWW i REST API (http://<ip>/) - np. GET /sensor/indoor_temperature, POST /climate/klimatyzator/set
+web_server:
+  port: 80
+  version: 3
 
 # konfiguracja Wi-Fi także przez kabel USB (np. web.esphome.io)
 improv_serial:
